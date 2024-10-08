@@ -194,8 +194,8 @@ class AuthController {
         try {
             const user = await User.findOne({
                 where: {
-                    reset_password_token: token, // Make sure this matches your model
-                    reset_password_expires_at: { // Use snake_case here
+                    reset_password_token: token,
+                    reset_password_expires_at: {
                         [Op.gt]: new Date(),
                     },
                 },
