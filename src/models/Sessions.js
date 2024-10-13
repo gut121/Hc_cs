@@ -7,6 +7,7 @@ const Sessions = sequelize.define(
         client_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            
         },
         trainer_id: {
             type: DataTypes.INTEGER,

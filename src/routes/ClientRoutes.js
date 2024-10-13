@@ -1,7 +1,6 @@
 const express = require('express');
+const ClientController = require('../controllers/ClientController');
 const router = express.Router();
-const ClientController = require('../controllers/ ClientController');
-
 
 router.get('/:id', ClientController.getClientProfile);
 

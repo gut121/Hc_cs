@@ -1,6 +1,6 @@
 const express = require('express');
-const router = express.Router();
 const TrainerController = require('../controllers/TrainerController');
+const router = express.Router();
 
 
 router.get('/:id', TrainerController.getTrainerProfile);
