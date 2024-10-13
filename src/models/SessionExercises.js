@@ -22,7 +22,7 @@ const SessionExercises = sequelize.define('SessionExercises', {
             model: 'ExerciseGuides',
             key: 'id',
         },
-        onDelete: 'CASCADE', 
+        onDelete: 'CASCADE',
     },
     sets: {
         type: DataTypes.INTEGER,
@@ -32,12 +32,14 @@ const SessionExercises = sequelize.define('SessionExercises', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    created_at: {
+    createdAt: { 
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
     },
-    updated_at: {
+    updatedAt: { 
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
     },
 }, {
