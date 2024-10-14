@@ -7,8 +7,9 @@ const AuthRoutes = require('./routes/AuthRoutes');
 const WorkoutPlansRoutes = require('./routes/WorkoutPlansRoutes');
 const WeeklySchedulesRoutes = require('./routes/WeeklySchedulesRoutes');
 const MealPlanRoutes = require('./routes/MealPlanRoutes');
-const sessionRoutes = require('./routes/SessionsRoutes');
-const exerciseRoutes = require('./routes/ExerciseGuidesRoutes');
+const SessionRoutes = require('./routes/SessionsRoutes');
+const ExerciseGuidesRoutes = require('./routes/ExerciseGuidesRoutes');
+const SessioneExerciseRoutes = require('./routes/SessionExercisesRoutes');
 const morgan = require('morgan');
 
 const app = express();
@@ -16,13 +17,15 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 app.use('/api/auth', AuthRoutes);
-// app.use('/api/workoutplans', WorkoutPlansRoutes);
-// app.use('/api/weeklyschedules', WeeklySchedulesRoutes);
-// app.use('/api/meal-plans', MealPlanRoutes);
-// app.use('/api/clients', ClientRoutes);
-// app.use('/api/trainers', TrainerRoutes);
-// app.use('/api/sessions', sessionRoutes);
-// app.use('/api/exercises', exerciseRoutes);
+app.use('/api/workoutplans', WorkoutPlansRoutes);
+app.use('/api/weeklyschedules', WeeklySchedulesRoutes);
+app.use('/api/meal-plans', MealPlanRoutes);
+app.use('/api/clients', ClientRoutes);
+app.use('/api/trainers', TrainerRoutes);
+app.use('/api/sessions', SessionRoutes);
+app.use('/api/session-exercises', SessioneExerciseRoutes);
+app.use('/api/Exercise', ExerciseGuidesRoutes);
+
 
 sequelize
     .sync()
