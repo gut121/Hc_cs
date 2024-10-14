@@ -1,96 +1,110 @@
-const { Sessions, SessionExercises, ExerciseGuides, User } = require('../models');
+const {
+  Sessions,
+  SessionExercises,
+  ExerciseGuides,
+  User,
+  sequelize,
+} = require("../models");
 
-
-const createSession = async (req, res) => {
+class SessionController {
+  async createSession(req, res) {
+    const transaction = await sequelize.transaction();
     try {
-        const { client_id, trainer_id, session_date, exercises } = req.body;
+      const { client_id, trainer_id, session_date, exercises } = req.body;
 
-       
-        const session = await Sessions.create({
-            client_id,
-            trainer_id,
-            session_date,
-            status: 'pending', // Mặc định là pending
-        });
+      const session = await Sessions.create(
+        {
+          client_id,
+          trainer_id,
+          session_date,
+          status: "pending",
+        },
+        { transaction }
+      );
 
-        // Thêm các bài tập vào session
-        if (exercises && exercises.length > 0) {
-            for (const exercise of exercises) {
-                await SessionExercises.create({
-                    session_id: session.id,
-                    exercise_id: exercise.exercise_id,
-                    sets: exercise.sets,
-                    reps: exercise.reps,
-                });
-            }
-        }
+      if (exercises && exercises.length > 0) {
+        const sessionExercises = exercises.map((exercise) => ({
+          session_id: session.id,
+          exercise_id: exercise.exercise_id,
+          sets: exercise.sets,
+          reps: exercise.reps,
+        }));
 
-        res.status(201).json({ session });
+        await SessionExercises.bulkCreate(sessionExercises, { transaction });
+      }
+
+      await transaction.commit();
+
+      res.status(201).json({ session });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create session' });
+      await transaction.rollback();
+      console.error("Error creating session:", error);
+      res.status(500).json({ error: "Failed to create session" });
     }
-};
+  }
 
-// Lấy danh sách các buổi tập
-const getSessions = async (req, res) => {
+  async getSessions(req, res) {
     try {
-        const sessions = await Sessions.findAll({
+      const sessions = await Sessions.findAll({
+        include: [
+          { model: User, as: "Client", attributes: ["id", "name"] },
+          { model: User, as: "Trainer", attributes: ["id", "name"] },
+          {
+            model: SessionExercises,
             include: [
-                { model: User, as: 'Client', attributes: ['name'] },
-                { model: User, as: 'Trainer', attributes: ['name'] },
-                {
-                    model: ExerciseGuides,
-                    through: { attributes: ['sets', 'reps'] },
-                },
+              {
+                model: ExerciseGuides,
+                attributes: ["name"],
+              },
             ],
-        });
-        res.status(200).json(sessions);
+            attributes: ["sets", "reps"],
+          },
+        ],
+      });
+      res.status(200).json(sessions);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve sessions' });
+      console.error("Error fetching sessions:", error);
+      res.status(500).json({ error: "Failed to retrieve sessions" });
     }
-};
+  }
 
-// Cập nhật thông tin buổi tập
-const updateSession = async (req, res) => {
+  async updateSession(req, res) {
     try {
-        const { id } = req.params;
-        const { session_date, status } = req.body;
+      const { id } = req.params;
+      const { session_date, status } = req.body;
 
-        const session = await Sessions.findByPk(id);
-        if (!session) {
-            return res.status(404).json({ error: 'Session not found' });
-        }
+      const session = await Sessions.findByPk(id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
 
-        session.session_date = session_date || session.session_date;
-        session.status = status || session.status;
-        await session.save();
+      session.session_date = session_date || session.session_date;
+      session.status = status || session.status;
+      await session.save();
 
-        res.status(200).json({ session });
+      res.status(200).json({ session });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update session' });
+      console.error("Error updating session:", error);
+      res.status(500).json({ error: "Failed to update session" });
     }
-};
+  }
 
-// Xóa một buổi tập
-const deleteSession = async (req, res) => {
+  async deleteSession(req, res) {
     try {
-        const { id } = req.params;
+      const { id } = req.params;
 
-        const session = await Sessions.findByPk(id);
-        if (!session) {
-            return res.status(404).json({ error: 'Session not found' });
-        }
+      const session = await Sessions.findByPk(id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
 
-        await session.destroy();
-        res.status(200).json({ message: 'Session deleted successfully' });
+      await session.destroy();
+      res.status(200).json({ message: "Session deleted successfully" });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete session' });
+      console.error("Error deleting session:", error);
+      res.status(500).json({ error: "Failed to delete session" });
     }
-};
+  }
+}
 
-module.exports = {
-    createSession,
-    getSessions,
-    updateSession,
-    deleteSession,
-};
+module.exports = new SessionController();
